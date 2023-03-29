@@ -2,7 +2,7 @@
 # Simple script to setup the build environment
 
 _what_i_build="autoSD"
-_dname="autoSDbuilder"
+_dname="autosd_builder"
 _docker_registry="ghcr.io/jto6/"
 _install_dir=~/Dev
 
@@ -39,12 +39,12 @@ mkdir -p ${_install_dir}
 # Note this cannot be done inside the container since the container does not have the user's
 # credentials.
 cd ${_install_dir}
-git clone xxx.git
+git clone https://gitlab.com/CentOS/automotive/sample-images.git
 
 # Run container's host setup scripts to populate persistent data
 # Do not map home directory as hostsetup.sh may copy original home content to the
 # persistent home directory (eg, .bashrc etc)
-docker run -it --rm -e LOCAL_USER_ID=`id -u $USER` --network host\
+docker run -it --rm -u `id -u $USER`:`id -g $USER` --network host\
        -e http_proxy -e https_proxy -e no_proxy \
        -v ${_install_edk2_dir}:/app \
        ${_docker_registry}${_dname} /usr/local/bin/hostsetup.sh
@@ -52,7 +52,7 @@ docker run -it --rm -e LOCAL_USER_ID=`id -u $USER` --network host\
 
 # Setup command aliases
 echo
-echo "alias ${_what_i_build}_builder='docker run -it --rm -e LOCAL_USER_ID=`id -u $USER` --privileged "\
+echo "alias ${_what_i_build}_builder='docker run -it --rm -u \`id -u $USER\`:\`id -g $USER\` --privileged "\
      "--network host -e http_proxy -e https_proxy -e no_proxy "\
      "-v ${_install_dir}:/app "\
      "-v $HOME:$HOME "\
